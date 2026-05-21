@@ -209,7 +209,7 @@ export default function App() {
       <div style={s.main}>
         <div style={s.topBar}>
           <h2 style={s.h2}>Flujo de trabajo</h2>
-          {rol === 'admin' && (
+          {(rol === 'admin' || rol === 'diseno') && (
             <button style={s.btnAdd} onClick={() => setModal(true)}>+ Nuevo trabajo</button>
           )}
         </div>
@@ -253,7 +253,7 @@ export default function App() {
                           <button style={s.btnDescargar}>⬇ Ver / Descargar archivo</button>
                         </a>
                       )}
-                      {rol === 'admin' && (
+                      {(rol === 'admin' || rol === 'diseno') && (
                         <button style={s.btnSubir} onClick={() => abrirSubirArchivo(t)} disabled={uploading === t.id}>
                           {uploading === t.id ? 'Subiendo...' : t.archivo_url ? '🔄 Reemplazar archivo' : '⬆ Subir archivo'}
                         </button>
@@ -263,7 +263,7 @@ export default function App() {
                           Pasar a {ETAPAS.find(e => e.key === etapa.siguiente)?.label} →
                         </button>
                       )}
-                      {rol === 'admin' && (
+                      {(rol === 'admin' || rol === 'diseno') && (
                         <button style={s.btnCancelar} onClick={() => setConfirmCancelar(t)}>
                           Cancelar trabajo
                         </button>
