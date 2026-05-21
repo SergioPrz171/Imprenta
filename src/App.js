@@ -218,7 +218,7 @@ export default function App() {
           <div style={s.loading}>Cargando trabajos...</div>
         ) : (
           <div style={s.columns}>
-            {(rol === 'admin' ? ETAPAS : ETAPAS.filter(e => e.key === rol || e.key === 'entregado')).map(etapa => {
+            {(rol === 'admin' || rol === 'diseno' ? ETAPAS : ETAPAS.filter(e => e.key === rol || e.key === 'entregado')).map(etapa => {
               const items = trabajos.filter(t => t.etapa === etapa.key)
               const puedeAvanzar = rol === 'admin' || rol === etapa.equipo
               return (
