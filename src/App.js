@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
 const EQUIPOS = {
-  admin: { label: 'Administrador', color: '#534AB7', bg: '#EEEDFE' },
-  diseno: { label: 'Diseño', color: '#185FA5', bg: '#E6F1FB' },
-  impresion: { label: 'Impresión', color: '#854F0B', bg: '#FAEEDA' },
-  acabados: { label: 'Acabados', color: '#3B6D11', bg: '#EAF3DE' },
+  admin: { label: 'Administrador', color: '#FF6B00', bg: '#1a1a1a' },
+  diseno: { label: 'Diseño', color: '#FF6B00', bg: '#1a1a1a' },
+  impresion: { label: 'Impresión', color: '#FF6B00', bg: '#1a1a1a' },
+  acabados: { label: 'Acabados', color: '#FF6B00', bg: '#1a1a1a' },
 }
 
 const ETAPAS = [
-  { key: 'diseno', label: 'Diseño', equipo: 'diseno', siguiente: 'impresion', color: '#185FA5', bg: '#E6F1FB' },
-  { key: 'impresion', label: 'Impresión', equipo: 'impresion', siguiente: 'acabados', color: '#854F0B', bg: '#FAEEDA' },
-  { key: 'acabados', label: 'Acabados', equipo: 'acabados', siguiente: 'entregado', color: '#3B6D11', bg: '#EAF3DE' },
-  { key: 'entregado', label: 'Entregado', equipo: null, siguiente: null, color: '#534AB7', bg: '#EEEDFE' },
+  { key: 'diseno', label: 'Diseño', equipo: 'diseno', siguiente: 'impresion', color: '#FF6B00', bg: '#2a1a00', border: '#FF6B00' },
+  { key: 'impresion', label: 'Impresión', equipo: 'impresion', siguiente: 'acabados', color: '#FFA040', bg: '#2a1800', border: '#FFA040' },
+  { key: 'acabados', label: 'Acabados', equipo: 'acabados', siguiente: 'entregado', color: '#aaaaaa', bg: '#222222', border: '#666666' },
+  { key: 'entregado', label: 'Entregado', equipo: null, siguiente: null, color: '#4CAF50', bg: '#0d2010', border: '#4CAF50' },
 ]
 
 const USUARIOS = {
@@ -23,65 +23,66 @@ const USUARIOS = {
 }
 
 const s = {
-  app: { minHeight: '100vh', background: '#f5f5f5', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
-  loginWrap: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' },
-  loginCard: { background: '#fff', borderRadius: 16, border: '1px solid #e5e5e5', padding: '2rem', width: 340, maxWidth: '95vw' },
-  loginTitle: { fontSize: 22, fontWeight: 500, marginBottom: 8, color: '#111' },
-  loginSub: { fontSize: 14, color: '#888', marginBottom: 24 },
-  label: { display: 'block', fontSize: 12, color: '#666', marginBottom: 4 },
-  input: { width: '100%', padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: 8, fontSize: 14, outline: 'none', marginBottom: 12, background: '#fff', color: '#111' },
-  select: { width: '100%', padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: 8, fontSize: 14, outline: 'none', marginBottom: 12, background: '#fff', color: '#111' },
-  btnPrimary: { width: '100%', padding: '10px 0', background: '#534AB7', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 500, cursor: 'pointer' },
-  error: { color: '#E24B4A', fontSize: 13, marginBottom: 12 },
-  nav: { background: '#fff', borderBottom: '1px solid #e5e5e5', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 },
-  navTitle: { fontSize: 16, fontWeight: 500, color: '#111', display: 'flex', alignItems: 'center', gap: 8 },
+  app: { minHeight: '100vh', background: '#111111', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
+  loginWrap: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111111' },
+  loginCard: { background: '#1e1e1e', borderRadius: 16, border: '1px solid #333', padding: '2rem', width: 360, maxWidth: '95vw' },
+  loginLogo: { fontSize: 36, marginBottom: 8, textAlign: 'center' },
+  loginTitle: { fontSize: 22, fontWeight: 700, marginBottom: 4, color: '#FF6B00', textAlign: 'center' },
+  loginSub: { fontSize: 13, color: '#888', marginBottom: 28, textAlign: 'center' },
+  label: { display: 'block', fontSize: 12, color: '#aaa', marginBottom: 4 },
+  input: { width: '100%', padding: '10px 12px', border: '1px solid #333', borderRadius: 8, fontSize: 14, outline: 'none', marginBottom: 12, background: '#2a2a2a', color: '#fff' },
+  select: { width: '100%', padding: '10px 12px', border: '1px solid #333', borderRadius: 8, fontSize: 14, outline: 'none', marginBottom: 12, background: '#2a2a2a', color: '#fff' },
+  btnPrimary: { width: '100%', padding: '11px 0', background: '#FF6B00', color: '#fff', border: 'none', borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.5 },
+  error: { color: '#ff4444', fontSize: 13, marginBottom: 12 },
+  nav: { background: '#1a1a1a', borderBottom: '2px solid #FF6B00', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 },
+  navTitle: { fontSize: 18, fontWeight: 700, color: '#FF6B00', display: 'flex', alignItems: 'center', gap: 10, letterSpacing: 0.5 },
   navRight: { display: 'flex', alignItems: 'center', gap: 12 },
-  rolBadge: { fontSize: 12, fontWeight: 500, padding: '3px 10px', borderRadius: 999 },
-  btnOut: { fontSize: 13, color: '#888', background: 'none', border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 12px', cursor: 'pointer' },
-  main: { padding: '1.5rem', maxWidth: 1200, margin: '0 auto' },
+  rolBadge: { fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 999, background: '#FF6B00', color: '#fff' },
+  btnOut: { fontSize: 13, color: '#aaa', background: 'none', border: '1px solid #444', borderRadius: 8, padding: '6px 14px', cursor: 'pointer' },
+  main: { padding: '1.5rem', maxWidth: 1300, margin: '0 auto' },
   topBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 },
-  h2: { fontSize: 18, fontWeight: 500, color: '#111' },
-  btnAdd: { display: 'flex', alignItems: 'center', gap: 6, background: '#534AB7', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 16px', fontSize: 14, fontWeight: 500, cursor: 'pointer' },
-  columns: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 },
-  col: { background: '#fff', borderRadius: 12, border: '1px solid #e5e5e5', padding: 12 },
-  colHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  colTitle: { fontSize: 13, fontWeight: 500 },
-  badge: { fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px' },
-  card: { background: '#fafafa', border: '1px solid #e5e5e5', borderRadius: 8, padding: '10px 12px', marginBottom: 8 },
-  cardUrgente: { background: '#FFF5F5', border: '1.5px solid #E24B4A', borderRadius: 8, padding: '10px 12px', marginBottom: 8 },
-  urgenteTag: { display: 'inline-flex', alignItems: 'center', gap: 4, background: '#E24B4A', color: '#fff', fontSize: 11, fontWeight: 500, borderRadius: 999, padding: '2px 8px', marginBottom: 6 },
-  cardCliente: { fontSize: 13, fontWeight: 500, color: '#111', marginBottom: 4 },
-  cardDesc: { fontSize: 12, color: '#666', marginBottom: 8, lineHeight: 1.4 },
-  detalleGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 },
-  detalleItem: { fontSize: 11, color: '#888' },
-  detalleVal: { fontSize: 11, color: '#444', fontWeight: 500 },
-  notaBox: { background: '#f0f0f0', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: '#555', marginBottom: 8, lineHeight: 1.4 },
+  h2: { fontSize: 20, fontWeight: 700, color: '#ffffff', letterSpacing: 0.3 },
+  btnAdd: { display: 'flex', alignItems: 'center', gap: 8, background: '#FF6B00', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
+  columns: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 14 },
+  col: { background: '#1a1a1a', borderRadius: 12, border: '1px solid #2a2a2a', padding: 14 },
+  colHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 10, borderBottom: '1px solid #2a2a2a' },
+  colTitle: { fontSize: 14, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase' },
+  badge: { fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '3px 10px', border: '1px solid' },
+  card: { background: '#222222', border: '1px solid #333', borderRadius: 10, padding: '12px 14px', marginBottom: 10 },
+  cardUrgente: { background: '#2a1200', border: '2px solid #FF6B00', borderRadius: 10, padding: '12px 14px', marginBottom: 10 },
+  urgenteTag: { display: 'inline-flex', alignItems: 'center', gap: 4, background: '#FF6B00', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '3px 10px', marginBottom: 8, letterSpacing: 0.5 },
+  cardCliente: { fontSize: 14, fontWeight: 700, color: '#ffffff', marginBottom: 4 },
+  cardDesc: { fontSize: 12, color: '#999', marginBottom: 10, lineHeight: 1.4 },
+  detalleGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10, background: '#1a1a1a', borderRadius: 8, padding: '8px 10px' },
+  detalleItem: { fontSize: 11, color: '#666' },
+  detalleVal: { fontSize: 11, color: '#FF6B00', fontWeight: 600 },
+  notaBox: { background: '#1a1a1a', borderLeft: '3px solid #FF6B00', borderRadius: '0 6px 6px 0', padding: '6px 10px', fontSize: 11, color: '#aaa', marginBottom: 10, lineHeight: 1.4 },
   cardMeta: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  cardFecha: { fontSize: 11, color: '#aaa' },
-  btnAvanzar: { width: '100%', padding: '7px 0', background: '#534AB7', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer' },
-  btnCancelar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#E24B4A', border: '1px solid #E24B4A', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
-  btnDescargar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#185FA5', border: '1px solid #185FA5', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
-  btnSubir: { width: '100%', padding: '7px 0', background: 'transparent', color: '#3B6D11', border: '1px solid #3B6D11', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
-  archivoTag: { display: 'flex', alignItems: 'center', gap: 6, background: '#EAF3DE', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: '#3B6D11', marginBottom: 6 },
-  empty: { textAlign: 'center', color: '#bbb', fontSize: 12, padding: '20px 0' },
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' },
-  modal: { background: '#fff', borderRadius: 16, border: '1px solid #e5e5e5', padding: '1.5rem', width: 420, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' },
-  modalTitle: { fontSize: 16, fontWeight: 500, marginBottom: '1rem', color: '#111' },
+  cardFecha: { fontSize: 11, color: '#FF6B00', display: 'flex', alignItems: 'center', gap: 4 },
+  btnAvanzar: { width: '100%', padding: '8px 0', background: '#FF6B00', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer', letterSpacing: 0.3 },
+  btnCancelar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#ff4444', border: '1px solid #ff4444', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', marginTop: 6 },
+  btnDescargar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#FFA040', border: '1px solid #FFA040', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', marginTop: 6 },
+  btnSubir: { width: '100%', padding: '7px 0', background: 'transparent', color: '#aaa', border: '1px solid #555', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', marginTop: 6 },
+  archivoTag: { display: 'flex', alignItems: 'center', gap: 6, background: '#1a1a1a', border: '1px solid #333', borderRadius: 6, padding: '5px 10px', fontSize: 11, color: '#FFA040', marginBottom: 8 },
+  empty: { textAlign: 'center', color: '#444', fontSize: 12, padding: '24px 0' },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' },
+  modal: { background: '#1e1e1e', borderRadius: 16, border: '1px solid #333', padding: '1.5rem', width: 440, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' },
+  modalTitle: { fontSize: 17, fontWeight: 700, marginBottom: '1rem', color: '#FF6B00' },
   field: { marginBottom: 12 },
-  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #e0e0e0', borderRadius: 8, fontSize: 14, outline: 'none', resize: 'vertical', minHeight: 70, background: '#fff', color: '#111' },
+  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #333', borderRadius: 8, fontSize: 14, outline: 'none', resize: 'vertical', minHeight: 70, background: '#2a2a2a', color: '#fff' },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: '1rem' },
-  btnCancel: { background: 'transparent', border: '1px solid #e0e0e0', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#666' },
-  btnSave: { background: '#534AB7', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 500, cursor: 'pointer' },
+  btnCancel: { background: 'transparent', border: '1px solid #444', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#aaa' },
+  btnSave: { background: '#FF6B00', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 },
-  checkLabel: { fontSize: 14, color: '#111' },
-  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontSize: 15, color: '#888' },
-  confirmOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' },
-  confirmBox: { background: '#fff', borderRadius: 16, border: '1px solid #e5e5e5', padding: '1.5rem', width: 360, maxWidth: '100%' },
-  confirmTitle: { fontSize: 16, fontWeight: 500, color: '#111', marginBottom: 8 },
-  confirmText: { fontSize: 14, color: '#666', marginBottom: '1.5rem', lineHeight: 1.5 },
+  checkLabel: { fontSize: 14, color: '#ccc' },
+  loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontSize: 15, color: '#FF6B00' },
+  confirmOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' },
+  confirmBox: { background: '#1e1e1e', borderRadius: 16, border: '1px solid #444', padding: '1.5rem', width: 360, maxWidth: '100%' },
+  confirmTitle: { fontSize: 16, fontWeight: 700, color: '#ff4444', marginBottom: 8 },
+  confirmText: { fontSize: 14, color: '#aaa', marginBottom: '1.5rem', lineHeight: 1.5 },
   confirmFooter: { display: 'flex', gap: 8, justifyContent: 'flex-end' },
-  btnConfirmCancel: { background: 'transparent', border: '1px solid #e0e0e0', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#666' },
-  btnConfirmOk: { background: '#E24B4A', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 500, cursor: 'pointer' },
+  btnConfirmCancel: { background: 'transparent', border: '1px solid #444', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#aaa' },
+  btnConfirmOk: { background: '#ff4444', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
 }
 
 export default function App() {
@@ -197,11 +198,11 @@ export default function App() {
       <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,.tif,.tiff,.pdf" onChange={subirArchivo} />
 
       <nav style={s.nav}>
-        <div style={s.navTitle}>🖨️ Imprenta Digital</div>
+        <div style={s.navTitle}>
+          🖨️ Prorotulos
+        </div>
         <div style={s.navRight}>
-          <span style={{ ...s.rolBadge, background: EQUIPOS[rol]?.bg, color: EQUIPOS[rol]?.color }}>
-            {EQUIPOS[rol]?.label}
-          </span>
+          <span style={s.rolBadge}>{EQUIPOS[rol]?.label}</span>
           <button style={s.btnOut} onClick={logout}>Salir</button>
         </div>
       </nav>
@@ -222,10 +223,10 @@ export default function App() {
               const items = trabajos.filter(t => t.etapa === etapa.key)
               const puedeAvanzar = rol === 'admin' || rol === etapa.equipo
               return (
-                <div key={etapa.key} style={s.col}>
+                <div key={etapa.key} style={{ ...s.col, borderTop: `3px solid ${etapa.color}` }}>
                   <div style={s.colHeader}>
                     <span style={{ ...s.colTitle, color: etapa.color }}>{etapa.label}</span>
-                    <span style={{ ...s.badge, background: etapa.bg, color: etapa.color }}>{items.length}</span>
+                    <span style={{ ...s.badge, background: etapa.bg, color: etapa.color, borderColor: etapa.border }}>{items.length}</span>
                   </div>
                   {items.length === 0 && <div style={s.empty}>Sin trabajos</div>}
                   {items.sort((a, b) => b.urgente - a.urgente).map(t => (
@@ -241,12 +242,10 @@ export default function App() {
                       </div>
                       {t.notas && <div style={s.notaBox}>📝 {t.notas}</div>}
                       {t.archivo_url && (
-                        <div style={s.archivoTag}>
-                          📎 {t.archivo_nombre || 'Archivo adjunto'}
-                        </div>
+                        <div style={s.archivoTag}>📎 {t.archivo_nombre || 'Archivo adjunto'}</div>
                       )}
                       <div style={s.cardMeta}>
-                        <span style={s.cardFecha}>{t.fecha_entrega ? `Entrega: ${formatFecha(t.fecha_entrega)}` : ''}</span>
+                        <span style={s.cardFecha}>{t.fecha_entrega ? `📅 ${formatFecha(t.fecha_entrega)}` : ''}</span>
                       </div>
                       {t.archivo_url && (
                         <a href={t.archivo_url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
@@ -282,7 +281,7 @@ export default function App() {
           <div style={s.confirmBox}>
             <div style={s.confirmTitle}>¿Cancelar este trabajo?</div>
             <div style={s.confirmText}>
-              Vas a cancelar el trabajo de <strong>{confirmCancelar.cliente}</strong>. Esta acción no se puede deshacer.
+              Vas a cancelar el trabajo de <strong style={{ color: '#fff' }}>{confirmCancelar.cliente}</strong>. Esta acción no se puede deshacer.
             </div>
             <div style={s.confirmFooter}>
               <button style={s.btnConfirmCancel} onClick={() => setConfirmCancelar(null)}>No, mantener</button>
@@ -295,7 +294,7 @@ export default function App() {
       {modal && (
         <div style={s.overlay} onClick={e => e.target === e.currentTarget && setModal(false)}>
           <div style={s.modal}>
-            <div style={s.modalTitle}>Nuevo trabajo</div>
+            <div style={s.modalTitle}>+ Nuevo trabajo</div>
             <div style={s.field}>
               <label style={s.label}>Cliente *</label>
               <input style={s.input} value={form.cliente} onChange={e => setForm({ ...form, cliente: e.target.value })} placeholder="Nombre del cliente" />
@@ -331,7 +330,7 @@ export default function App() {
               <textarea style={s.textarea} value={form.notas} onChange={e => setForm({ ...form, notas: e.target.value })} placeholder="Cualquier detalle importante..." />
             </div>
             <div style={s.checkRow}>
-              <input type="checkbox" id="urgente" checked={form.urgente} onChange={e => setForm({ ...form, urgente: e.target.checked })} style={{ width: 16, height: 16, cursor: 'pointer' }} />
+              <input type="checkbox" id="urgente" checked={form.urgente} onChange={e => setForm({ ...form, urgente: e.target.checked })} style={{ width: 16, height: 16, cursor: 'pointer', accentColor: '#FF6B00' }} />
               <label htmlFor="urgente" style={{ ...s.checkLabel, cursor: 'pointer' }}>⚡ Marcar como urgente</label>
             </div>
             <div style={s.modalFooter}>
@@ -349,8 +348,8 @@ function LoginScreen({ form, setForm, onLogin, error }) {
   return (
     <div style={s.loginWrap}>
       <div style={s.loginCard}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>🖨️</div>
-        <div style={s.loginTitle}>Imprenta Digital</div>
+        <div style={s.loginLogo}>🖨️</div>
+        <div style={s.loginTitle}>Prorotulos</div>
         <div style={s.loginSub}>Ingresa con tu equipo para continuar</div>
         <label style={s.label}>Equipo</label>
         <select style={s.select} value={form.usuario} onChange={e => setForm({ ...form, usuario: e.target.value })}>
@@ -369,7 +368,7 @@ function LoginScreen({ form, setForm, onLogin, error }) {
           placeholder="Contraseña"
         />
         {error && <div style={s.error}>{error}</div>}
-        <button style={s.btnPrimary} onClick={onLogin}>Entrar</button>
+        <button style={s.btnPrimary} onClick={onLogin}>ENTRAR</button>
       </div>
     </div>
   )
