@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
 const EQUIPOS = {
@@ -59,6 +59,10 @@ const s = {
   cardMeta: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   cardFecha: { fontSize: 11, color: '#aaa' },
   btnAvanzar: { width: '100%', padding: '7px 0', background: '#534AB7', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer' },
+  btnCancelar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#E24B4A', border: '1px solid #E24B4A', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
+  btnDescargar: { width: '100%', padding: '7px 0', background: 'transparent', color: '#185FA5', border: '1px solid #185FA5', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
+  btnSubir: { width: '100%', padding: '7px 0', background: 'transparent', color: '#3B6D11', border: '1px solid #3B6D11', borderRadius: 6, fontSize: 12, fontWeight: 500, cursor: 'pointer', marginTop: 6 },
+  archivoTag: { display: 'flex', alignItems: 'center', gap: 6, background: '#EAF3DE', borderRadius: 6, padding: '5px 8px', fontSize: 11, color: '#3B6D11', marginBottom: 6 },
   empty: { textAlign: 'center', color: '#bbb', fontSize: 12, padding: '20px 0' },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' },
   modal: { background: '#fff', borderRadius: 16, border: '1px solid #e5e5e5', padding: '1.5rem', width: 420, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' },
@@ -71,6 +75,13 @@ const s = {
   checkRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 },
   checkLabel: { fontSize: 14, color: '#111' },
   loading: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontSize: 15, color: '#888' },
+  confirmOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' },
+  confirmBox: { background: '#fff', borderRadius: 16, border: '1px solid #e5e5e5', padding: '1.5rem', width: 360, maxWidth: '100%' },
+  confirmTitle: { fontSize: 16, fontWeight: 500, color: '#111', marginBottom: 8 },
+  confirmText: { fontSize: 14, color: '#666', marginBottom: '1.5rem', lineHeight: 1.5 },
+  confirmFooter: { display: 'flex', gap: 8, justifyContent: 'flex-end' },
+  btnConfirmCancel: { background: 'transparent', border: '1px solid #e0e0e0', borderRadius: 8, padding: '8px 16px', fontSize: 14, cursor: 'pointer', color: '#666' },
+  btnConfirmOk: { background: '#E24B4A', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 500, cursor: 'pointer' },
 }
 
 export default function App() {
@@ -82,6 +93,10 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ usuario: 'admin', password: '' })
   const [loginError, setLoginError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [confirmCancelar, setConfirmCancelar] = useState(null)
+  const [uploading, setUploading] = useState(null)
+  const fileInputRef = useRef(null)
+  const [uploadTarget, setUploadTarget] = useState(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('imprenta_usuario')
@@ -147,17 +162,42 @@ export default function App() {
     await supabase.from('trabajos').update({ etapa: etapa.siguiente }).eq('id', trabajo.id)
   }
 
+  async function cancelarTrabajo(id) {
+    await supabase.from('trabajos').delete().eq('id', id)
+    setConfirmCancelar(null)
+  }
+
+  function abrirSubirArchivo(trabajo) {
+    setUploadTarget(trabajo)
+    fileInputRef.current.click()
+  }
+
+  async function subirArchivo(e) {
+    const file = e.target.files[0]
+    if (!file || !uploadTarget) return
+    setUploading(uploadTarget.id)
+    const ext = file.name.split('.').pop()
+    const path = `${uploadTarget.id}.${ext}`
+    const { error } = await supabase.storage.from('archivos').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data } = supabase.storage.from('archivos').getPublicUrl(path)
+      await supabase.from('trabajos').update({ archivo_url: data.publicUrl, archivo_nombre: file.name }).eq('id', uploadTarget.id)
+    }
+    setUploading(null)
+    setUploadTarget(null)
+    e.target.value = ''
+  }
+
   const rol = usuario ? USUARIOS[usuario]?.rol : null
-  const etapasFiltradas = rol === 'admin' ? ETAPAS : ETAPAS.filter(e => e.key === rol || (rol !== 'admin' && e.key === 'entregado' && trabajos.some(t => t.etapa === 'entregado')))
 
   if (!usuario) return <LoginScreen form={loginForm} setForm={setLoginForm} onLogin={login} error={loginError} />
 
   return (
     <div style={s.app}>
+      <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*,.tif,.tiff,.pdf" onChange={subirArchivo} />
+
       <nav style={s.nav}>
-        <div style={s.navTitle}>
-          🖨️ Imprenta Digital
-        </div>
+        <div style={s.navTitle}>🖨️ Imprenta Digital</div>
         <div style={s.navRight}>
           <span style={{ ...s.rolBadge, background: EQUIPOS[rol]?.bg, color: EQUIPOS[rol]?.color }}>
             {EQUIPOS[rol]?.label}
@@ -170,9 +210,7 @@ export default function App() {
         <div style={s.topBar}>
           <h2 style={s.h2}>Flujo de trabajo</h2>
           {rol === 'admin' && (
-            <button style={s.btnAdd} onClick={() => setModal(true)}>
-              + Nuevo trabajo
-            </button>
+            <button style={s.btnAdd} onClick={() => setModal(true)}>+ Nuevo trabajo</button>
           )}
         </div>
 
@@ -202,12 +240,32 @@ export default function App() {
                         {t.confeccion && <><span style={s.detalleItem}>Confección</span><span style={s.detalleVal}>{t.confeccion}</span></>}
                       </div>
                       {t.notas && <div style={s.notaBox}>📝 {t.notas}</div>}
+                      {t.archivo_url && (
+                        <div style={s.archivoTag}>
+                          📎 {t.archivo_nombre || 'Archivo adjunto'}
+                        </div>
+                      )}
                       <div style={s.cardMeta}>
                         <span style={s.cardFecha}>{t.fecha_entrega ? `Entrega: ${formatFecha(t.fecha_entrega)}` : ''}</span>
                       </div>
+                      {t.archivo_url && (
+                        <a href={t.archivo_url} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                          <button style={s.btnDescargar}>⬇ Ver / Descargar archivo</button>
+                        </a>
+                      )}
+                      {rol === 'admin' && (
+                        <button style={s.btnSubir} onClick={() => abrirSubirArchivo(t)} disabled={uploading === t.id}>
+                          {uploading === t.id ? 'Subiendo...' : t.archivo_url ? '🔄 Reemplazar archivo' : '⬆ Subir archivo'}
+                        </button>
+                      )}
                       {puedeAvanzar && etapa.siguiente && (
-                        <button style={s.btnAvanzar} onClick={() => avanzar(t)}>
+                        <button style={{ ...s.btnAvanzar, marginTop: 6 }} onClick={() => avanzar(t)}>
                           Pasar a {ETAPAS.find(e => e.key === etapa.siguiente)?.label} →
+                        </button>
+                      )}
+                      {rol === 'admin' && (
+                        <button style={s.btnCancelar} onClick={() => setConfirmCancelar(t)}>
+                          Cancelar trabajo
                         </button>
                       )}
                     </div>
@@ -218,6 +276,21 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {confirmCancelar && (
+        <div style={s.confirmOverlay}>
+          <div style={s.confirmBox}>
+            <div style={s.confirmTitle}>¿Cancelar este trabajo?</div>
+            <div style={s.confirmText}>
+              Vas a cancelar el trabajo de <strong>{confirmCancelar.cliente}</strong>. Esta acción no se puede deshacer.
+            </div>
+            <div style={s.confirmFooter}>
+              <button style={s.btnConfirmCancel} onClick={() => setConfirmCancelar(null)}>No, mantener</button>
+              <button style={s.btnConfirmOk} onClick={() => cancelarTrabajo(confirmCancelar.id)}>Sí, cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {modal && (
         <div style={s.overlay} onClick={e => e.target === e.currentTarget && setModal(false)}>
